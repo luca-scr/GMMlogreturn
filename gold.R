@@ -4,6 +4,7 @@ library(mclust)
 library(mclustAddons)
 library(data.table)
 library(ggplot2)
+theme_set(theme_bw())
 
 GOLD = quantmod::getSymbols("GC=F", src = "yahoo", auto.assign = FALSE)
 GOLD = quantmod::dailyReturn(GOLD, type = "log")

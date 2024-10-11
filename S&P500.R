@@ -4,6 +4,7 @@ library(mclust)
 library(mclustAddons)
 library(data.table)
 library(ggplot2)
+theme_set(theme_bw())
 library(patchwork)
 
 SP500 = quantmod::getSymbols("^GSPC", src = "yahoo", auto.assign = FALSE)
@@ -55,7 +56,7 @@ for(t in seq(years))
     geom_histogram(aes(y = after_stat(density)),
                    fill = "grey",
                    col = theme_get()$panel.background$fill,
-                   bins = nclass.numpy(DT$log.returns)) +
+                   bins = 31) +
     geom_rug() +
     geom_line(data = data.table(x = y0,
                                 dens = predict(GMM[[t]], what = "dens",
@@ -91,13 +92,14 @@ dtab = melt(tab[, .(Year, Entropy, EntGauss)],
             id.vars = "Year",
             variable.name = "Method", 
             value.name = "Entropy")
-levels(dtab$Method) = c("GMM", "Gaussian")
+dtab[, Method := factor(Method, levels = c("EntGauss", "Entropy"), 
+                        labels = c("Gaussian", "GMM"))]
 
 ggplot(data = dtab,
        aes(x = Year, y = Entropy, color = Method, shape = Method)) +
   geom_point() +
-  scale_color_manual(name = NULL, values = c("steelblue", "red3")) +
-  scale_shape_manual(name = NULL, values = c(19, 0)) +
+  scale_color_manual(name = NULL, values = c("red3", "steelblue")) +
+  scale_shape_manual(name = NULL, values = c(0, 19)) +
   scale_x_continuous(name = NULL, breaks = years) +
   scale_y_continuous(sec.axis = sec_axis(function(ent) 1/sqrt(2*pi) * exp(ent - 1/2),
                                          name = "Std deviation"))
